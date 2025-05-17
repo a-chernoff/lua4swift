@@ -103,7 +103,7 @@ class Lua_Tests: XCTestCase {
 
     func testLifetime() throws {
         class LT: LuaCustomTypeInstance {
-            static var deinitCount = 0
+            nonisolated(unsafe) static var deinitCount = 0
 
             static func luaTypeName() -> String {
                 return "LifeThreateningLifestyles"
