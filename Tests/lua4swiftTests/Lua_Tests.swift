@@ -1,4 +1,6 @@
+#if canImport(Cocoa)
 import Cocoa
+#endif
 import XCTest
 
 @testable import lua4swift
