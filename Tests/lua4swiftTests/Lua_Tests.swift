@@ -3,9 +3,20 @@ import Cocoa
 #endif
 import XCTest
 
+import Foundation
 @testable import lua4swift
 
 class Lua_Tests: XCTestCase {
+    func testLoadModule() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
+        let vm = Lua.VirtualMachine()
+        try vm.loadModule(name: "write", url: url)
+        _ = try vm.eval("""
+            local write = require 'write'
+            write.writeobj(_G)
+            """)
+    }
+
     func testFundamentals() {
         let vm = Lua.VirtualMachine()
         let table = vm.createTable()

@@ -32,6 +32,9 @@ let package = Package(
       name: "lua4swiftTests",
       dependencies: [
         "lua4swift",
+      ],
+      resources: [
+        .copy("Resources/test.lua")
       ]),
   ]
 )

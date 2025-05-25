@@ -98,6 +98,10 @@ public struct Lua {
         public func createCustomType<T>(_ setup: (CustomType<T>) -> Void) -> CustomType<T> {
             self.state.createCustomType(setup)
         }
+
+        public func loadModule(name: String, url: URL) throws {
+            try self.state.loadModule(name: name, url: url)
+        }
     }
 
     public class State {
@@ -168,6 +172,48 @@ public struct Lua {
         fileprivate var registry: Table {
             pushFromStack(RegistryIndex)
             return popValue(-1) as! Table
+        }
+
+        fileprivate func loadModule(name: String, url: URL) throws {
+            let moduleStr = try String(contentsOf: url, encoding: .utf8)
+            let f: @convention(block) (UnsafeMutablePointer<lua_State>?) -> Int32 = { [weak self] state in
+                guard let self else { return 0 }
+                let modName = lua_tolstring(state, 1, nil)
+                let sModName = String(cString: modName!)
+                var res: Int32 = 0
+
+                if sModName == name {
+                    let nameStr = name.utf8CString
+                        nameStr.withUnsafeBufferPointer { namePtr in
+                            res = luaL_loadbufferx(
+                                state,
+                                moduleStr,
+                                moduleStr.count,
+                                namePtr.baseAddress,
+                                "t"
+                            )
+                    }
+                } else {
+                    // Unknown module
+                    let unknownModStr = "unknown module '\(sModName)'"
+                    unknownModStr.push(self)
+                    lua_error(state)
+                }
+
+                if res != LUA_OK {
+                    lua_error(state)
+                }
+
+                // Runs the Lua code and returns whatever it returns as the result of openf,
+                // which will be used as the value of the module
+                lua_callk(state, 0, 1, 0, nil)
+                return 1
+            }
+            let block: AnyObject = unsafeBitCast(f, to: AnyObject.self)
+            let imp = imp_implementationWithBlock(block)
+            let fp = unsafeBitCast(imp, to: lua_CFunction.self)
+
+            luaL_requiref(state, "write", fp, 0)
         }
 
         fileprivate func createFunction(_ body: URL) throws -> Function {
