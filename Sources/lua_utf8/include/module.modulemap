@@ -1,5 +1,0 @@
-module lua_utf8 {
-    header "lutf8lib.h"
-    export *
-}
-

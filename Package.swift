@@ -12,8 +12,6 @@ let package = Package(
             targets: ["lua4swift"]),
         .library(name: "CLua", targets: ["CLua"])
     ],
-    dependencies: [
-    ],
     targets: [
         .target(
             name: "CLua",
@@ -24,13 +22,6 @@ let package = Package(
                 .define("LUA_USE_IOS", .when(platforms: [.iOS, .visionOS]))
             ]),
         .target(
-            name: "lua_utf8",
-            dependencies: [
-                "CLua",
-            ],
-            path: "Sources/lua_utf8"
-        ),
-        .target(
             name: "lua4swift",
             dependencies: [
                 "CLua",
@@ -40,7 +31,6 @@ let package = Package(
             name: "lua4swiftTests",
             dependencies: [
                 "lua4swift",
-                "lua_utf8"
             ],
             resources: [
                 .copy("Resources/test.lua")

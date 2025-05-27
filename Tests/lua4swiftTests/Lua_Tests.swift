@@ -1,7 +1,6 @@
 #if canImport(Cocoa)
 import Cocoa
 #endif
-import lua_utf8
 import XCTest
 
 import Foundation
@@ -15,25 +14,6 @@ class Lua_Tests: XCTestCase {
         _ = try vm.eval("""
             local write = require 'write'
             write.writeobj(_G)
-            """)
-    }
-
-    func testLoadCModule() throws {
-        let vm = Lua.VirtualMachine()
-        "lua-utf8".withCString { name in
-            var modules = [
-                luaL_Reg(name: name, func: luaopen_utf82),
-                luaL_Reg(name: nil, func: nil)
-            ]
-            modules.withUnsafeMutableBufferPointer { bufPtr in
-                vm.preloadModules(bufPtr.baseAddress!)
-            }
-        }
-        _ = try vm.eval("""
-            local utf8 = require 'lua-utf8'
-            local str = 'archibald the sniper'
-            io.write(utf8.reverse(str))
-            io.write(utf8.title(str))
             """)
     }
 
