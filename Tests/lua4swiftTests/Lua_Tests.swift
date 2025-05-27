@@ -7,13 +7,23 @@ import Foundation
 @testable import lua4swift
 
 class Lua_Tests: XCTestCase {
-    func testLoadModule() throws {
+    func testLoadWriteModule() throws {
         let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
         let vm = Lua.VirtualMachine()
         try vm.loadModule(name: "write", url: url)
         _ = try vm.eval("""
             local write = require 'write'
             write.writeobj(_G)
+            """)
+    }
+
+    func testLoadAsdfModule() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
+        let vm = Lua.VirtualMachine()
+        try vm.loadModule(name: "asdf", url: url)
+        _ = try vm.eval("""
+            local asdf = require 'asdf'
+            asdf.writeobj(_G)
             """)
     }
 

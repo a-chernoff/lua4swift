@@ -213,7 +213,7 @@ public struct Lua {
             let imp = imp_implementationWithBlock(block)
             let fp = unsafeBitCast(imp, to: lua_CFunction.self)
 
-            luaL_requiref(state, "write", fp, 0)
+            luaL_requiref(state, name, fp, 0)
         }
 
         fileprivate func createFunction(_ body: URL) throws -> Function {
