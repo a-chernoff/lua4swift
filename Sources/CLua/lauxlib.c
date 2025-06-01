@@ -774,6 +774,19 @@ static int skipcomment (FILE *f, int *cp) {
   else return 0;  /* no comment */
 }
 
+/* bundle prefix workaround */
+static const char* loadfilex_prefix = NULL;
+LUALIB_API void luaL_set_loadfilex_prefix (const char* prefix) {
+    if (prefix == NULL) {
+        return;
+    }
+    if (loadfilex_prefix == NULL) {
+        loadfilex_prefix = malloc(strlen(prefix));
+    } else {
+        loadfilex_prefix = realloc((void*)loadfilex_prefix, strlen(prefix));
+    }
+    strcpy((char*)loadfilex_prefix, prefix);
+}
 
 LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
                                              const char *mode) {
@@ -787,6 +800,9 @@ LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
   }
   else {
     lua_pushfstring(L, "@%s", filename);
+    if (loadfilex_prefix != NULL) {
+      filename = strcat((char*)loadfilex_prefix, filename);
+    }
     lf.f = fopen(filename, "r");
     if (lf.f == NULL) return errfile(L, "open", fnameindex);
   }

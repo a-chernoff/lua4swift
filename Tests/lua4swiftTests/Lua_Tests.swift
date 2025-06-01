@@ -4,9 +4,22 @@ import Cocoa
 import XCTest
 
 import Foundation
+import CLua
 @testable import lua4swift
 
 class Lua_Tests: XCTestCase {
+    @MainActor func testDoFileWithBundlePrefix() async throws {
+        let vm = Lua.VirtualMachine()
+        try vm.setFilePrefix(Bundle.module.resourceURL!)
+        let result = try vm.eval("""
+            return dofile("test.lua")
+            """)
+
+        XCTAssertEqual(result.count, 1)
+        let table = try XCTUnwrap(result[0] as? Lua.Table)
+        XCTAssertNotNil(table["writeobj"])
+    }
+
     func testLoadWriteModule() throws {
         let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
         let vm = Lua.VirtualMachine()

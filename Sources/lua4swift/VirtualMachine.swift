@@ -37,6 +37,14 @@ public struct Lua {
             luaC_fullgc(self.state.state, 0)
         }
 
+        public func setFilePrefix(_ prefix: URL) throws {
+            guard prefix.isFileURL, prefix.hasDirectoryPath else { return }
+            let path = prefix.path + "/"
+            path.withCString { pathPtr in
+                luaL_set_loadfilex_prefix(pathPtr)
+            }
+        }
+
         public func preloadModules(_ modules: UnsafeMutablePointer<luaL_Reg>) {
             self.state.preloadModules(modules)
         }

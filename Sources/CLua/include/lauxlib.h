@@ -294,7 +294,8 @@ typedef struct luaL_Stream {
 #endif
 /* }============================================================ */
 
-
+/* bundle prefix for luaL_loadfilex */
+LUALIB_API void (luaL_set_loadfilex_prefix) (const char* prefix);
 
 #endif
 
