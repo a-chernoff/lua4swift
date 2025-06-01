@@ -1,5 +1,6 @@
 import Foundation
 import CLua
+import SwiftyRelativePath
 
 internal let RegistryIndex = Int(-LUAI_MAXSTACK - 1000)
 private let GlobalsTable = Int(LUA_RIDX_GLOBALS)
@@ -225,7 +226,27 @@ public struct Lua {
         }
 
         fileprivate func createFunction(_ body: URL) throws -> Function {
-            if luaL_loadfilex(state, body.path, nil) == LUA_OK {
+            let prefix = luaL_get_loadfilex_prefix()
+            // body will be absolute, but if we've supplied a loadfilex_prefix, we need its relative
+            // path from the prefix
+            var relativeBodyPath: String
+            if let prefix {
+                var prefixURL: URL
+                if #available(iOS 16, macOS 13, tvOS 16, visionOS 1, watchOS 9, *) {
+                    prefixURL = URL(filePath: String(cString: prefix))
+                } else {
+                    prefixURL = URL(fileURLWithPath: String(cString: prefix))
+                }
+
+                if let relativePath = body.relativePath(from: prefixURL) {
+                    relativeBodyPath = relativePath
+                } else {
+                    relativeBodyPath = body.path
+                }
+            } else {
+                relativeBodyPath = body.path
+            }
+            if luaL_loadfilex(state, relativeBodyPath, nil) == LUA_OK {
                 return popValue(-1) as! Function
             } else {
                 throw Lua.Error.internal(popError())

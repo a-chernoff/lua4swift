@@ -12,6 +12,9 @@ let package = Package(
             targets: ["lua4swift"]),
         .library(name: "CLua", targets: ["CLua"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/neoneye/SwiftyRelativePath", from: "1.0.0"),
+    ],
     targets: [
         .target(
             name: "CLua",
@@ -25,8 +28,13 @@ let package = Package(
             name: "lua4swift",
             dependencies: [
                 "CLua",
+                .product(
+                    name: "SwiftyRelativePath",
+                    package: "SwiftyRelativePath"
+                ),
             ],
-            path: "Sources/lua4swift"),
+            path: "Sources/lua4swift"
+        ),
         .testTarget(
             name: "lua4swiftTests",
             dependencies: [

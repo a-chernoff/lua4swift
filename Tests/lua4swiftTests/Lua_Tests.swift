@@ -8,7 +8,7 @@ import CLua
 @testable import lua4swift
 
 class Lua_Tests: XCTestCase {
-    @MainActor func testDoFileWithBundlePrefix() async throws {
+    func testDoFileWithBundlePrefix() throws {
         let vm = Lua.VirtualMachine()
         try vm.setFilePrefix(Bundle.module.resourceURL!)
         let result = try vm.eval("""
@@ -18,6 +18,19 @@ class Lua_Tests: XCTestCase {
         XCTAssertEqual(result.count, 1)
         let table = try XCTUnwrap(result[0] as? Lua.Table)
         XCTAssertNotNil(table["writeobj"])
+    }
+
+    func testEvalURL() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
+        let vm = Lua.VirtualMachine()
+        _ = try vm.eval(url)
+    }
+
+    func testEvalURLWithPrefix() throws {
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "test", withExtension: "lua"))
+        let vm = Lua.VirtualMachine()
+        try vm.setFilePrefix(Bundle.module.resourceURL!)
+        _ = try vm.eval(url)
     }
 
     func testLoadWriteModule() throws {
