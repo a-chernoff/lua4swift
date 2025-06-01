@@ -338,11 +338,23 @@ static int load_aux (lua_State *L, int status, int envidx) {
 
 
 static int luaB_loadfile (lua_State *L) {
-  const char *fname = luaL_optstring(L, 1, NULL);
-  const char *mode = luaL_optstring(L, 2, NULL);
-  int env = (!lua_isnone(L, 3) ? 3 : 0);  /* 'env' index or 0 if no 'env' */
-  int status = luaL_loadfilex(L, fname, mode);
-  return load_aux(L, status, env);
+    int needs_free = 0;
+    const char *fname = luaL_optstring(L, 1, NULL);
+    const char *mode = luaL_optstring(L, 2, NULL);
+    const char *prefix = luaL_get_loadfilex_prefix();
+    char *fcatname = NULL;
+    if (l_likely(prefix != NULL)) {
+        needs_free = 1;
+        fcatname = malloc(strlen(prefix) + strlen(fname) + 1);
+        strcat(fcatname, prefix);
+        strcat(fcatname, fname);
+    } else {
+        fcatname = (char*) fname;
+    }
+    int env = (!lua_isnone(L, 3) ? 3 : 0);  /* 'env' index or 0 if no 'env' */
+    int status = luaL_loadfilex(L, fcatname, mode);
+    if (needs_free) free(fcatname);
+    return load_aux(L, status, env);
 }
 
 
@@ -413,12 +425,26 @@ static int dofilecont (lua_State *L, int d1, lua_KContext d2) {
 
 
 static int luaB_dofile (lua_State *L) {
-  const char *fname = luaL_optstring(L, 1, NULL);
-  lua_settop(L, 1);
-  if (l_unlikely(luaL_loadfile(L, fname) != LUA_OK))
-    return lua_error(L);
-  lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
-  return dofilecont(L, 0, 0);
+    int needs_free = 0;
+    const char *fname = luaL_optstring(L, 1, NULL);
+    const char *prefix = luaL_get_loadfilex_prefix();
+    char *fcatname = NULL;
+    if (l_likely(prefix != NULL)) {
+        needs_free = 1;
+        fcatname = malloc(strlen(prefix) + strlen(fname) + 1);
+        strcat(fcatname, prefix);
+        strcat(fcatname, fname);
+    } else {
+        fcatname = (char*) fname;
+    }
+    lua_settop(L, 1);
+    if (l_unlikely(luaL_loadfile(L, fcatname) != LUA_OK)) {
+        if (needs_free) free(fcatname);
+        return lua_error(L);
+    }
+    if (needs_free) free(fcatname);
+    lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
+    return dofilecont(L, 0, 0);
 }
 
 

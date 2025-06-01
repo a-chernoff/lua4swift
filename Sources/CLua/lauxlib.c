@@ -804,9 +804,6 @@ LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
   }
   else {
     lua_pushfstring(L, "@%s", filename);
-    if (loadfilex_prefix != NULL) {
-      filename = strcat((char*)loadfilex_prefix, filename);
-    }
     lf.f = fopen(filename, "r");
     if (lf.f == NULL) return errfile(L, "open", fnameindex);
   }
