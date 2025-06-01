@@ -783,7 +783,7 @@ LUALIB_API void luaL_set_loadfilex_prefix (const char* prefix) {
     if (loadfilex_prefix == NULL) {
         loadfilex_prefix = malloc(strlen(prefix) + 1);
     } else {
-        loadfilex_prefix = realloc((void*)loadfilex_prefix, strlen(prefix) + 1);
+        loadfilex_prefix = realloc(loadfilex_prefix, strlen(prefix) + 1);
     }
     strcpy(loadfilex_prefix, prefix);
 }
