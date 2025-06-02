@@ -251,7 +251,7 @@ public struct Lua {
         }
 
         fileprivate func createUserdata<T: LuaCustomTypeInstance>(_ o: T) -> Userdata {
-            let userdata = lua_newuserdatauv(state, MemoryLayout<T>.size, 1) // this both pushes ptr onto stack and returns it
+            let userdata = lua_newuserdata(state, MemoryLayout<T>.size) // this both pushes ptr onto stack and returns it
 
             let ptr = userdata!.bindMemory(to: T.self, capacity: 1)
             ptr.initialize(to: o) // creates a new legit reference to o
@@ -283,7 +283,7 @@ public struct Lua {
                 } catch {
                     let e = (error as? LocalizedError)?.errorDescription ?? "Swift Error \(error)"
                     e.push(vm)
-                    lua_error(vm.state)
+                    return lua_error(vm.state)
                 }
             }
             let block: AnyObject = unsafeBitCast(f, to: AnyObject.self)
@@ -295,7 +295,7 @@ public struct Lua {
         }
 
         fileprivate func argError(_ expectedType: String, at argPosition: Int) {
-            luaL_typeerror(state, Int32(argPosition), expectedType.cString(using: .utf8))
+            luaL_argerror(state, Int32(argPosition), expectedType.cString(using: .utf8))
         }
 
         fileprivate func createCustomType<T>(_ setup: (CustomType<T>) -> Void) -> CustomType<T> {
