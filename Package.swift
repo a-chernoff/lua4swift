@@ -19,6 +19,7 @@ let package = Package(
             path: "Sources/CLua",
             cSettings: [
                 .define("LUA_USE_POSIX"),
+                .define("LUA_COMPAT_5_1"),
                 .define("LUA_USE_MACOSX", .when(platforms: [.macOS])),
                 .define("LUA_USE_IOS", .when(platforms: [.iOS, .visionOS]))
             ]),
