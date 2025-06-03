@@ -8,6 +8,19 @@ import CLua
 @testable import lua4swift
 
 class Lua_Tests: XCTestCase {
+    func testPatchedGsub() throws {
+        let vm = Lua.VirtualMachine()
+        try vm.setFilePrefix(Bundle.module.resourceURL!)
+        let result = try vm.eval("""
+            s = string.gsub("Lua is cute", "cute", "great")
+            return s
+            """)
+
+        XCTAssertEqual(result.count, 1)
+        let table = try XCTUnwrap(result[0] as? Lua.Table)
+        XCTAssertNotNil(table["writeobj"])
+    }
+
     func testDoFileWithBundlePrefix() throws {
         let vm = Lua.VirtualMachine()
         try vm.setFilePrefix(Bundle.module.resourceURL!)
