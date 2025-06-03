@@ -254,13 +254,25 @@ static void opencheck (lua_State *L, const char *fname, const char *mode) {
 
 
 static int io_open (lua_State *L) {
-  const char *filename = luaL_checkstring(L, 1);
-  const char *mode = luaL_optstring(L, 2, "r");
-  LStream *p = newfile(L);
-  const char *md = mode;  /* to traverse/check mode */
-  luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
-  p->f = fopen(filename, mode);
-  return (p->f == NULL) ? luaL_fileresult(L, 0, filename) : 1;
+    int needs_free = 0;
+    const char *filename = luaL_checkstring(L, 1);
+    const char *mode = luaL_optstring(L, 2, "r");
+    LStream *p = newfile(L);
+    const char *md = mode;  /* to traverse/check mode */
+    luaL_argcheck(L, l_checkmode(md), 2, "invalid mode");
+    const char *prefix = luaL_get_loadfilex_prefix();
+    char *fcatname = NULL;
+    if (prefix != NULL) {
+        needs_free = 1;
+        fcatname = malloc(strlen(prefix) + strlen(filename) + 1);
+        strcat(fcatname, prefix);
+        strcat(fcatname, filename);
+    } else {
+        fcatname = (char*) filename;
+    }
+    p->f = fopen(fcatname, mode);
+    if (needs_free) free(fcatname);
+    return (p->f == NULL) ? luaL_fileresult(L, 0, filename) : 1;
 }
 
 
