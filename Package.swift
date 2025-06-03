@@ -18,6 +18,7 @@ let package = Package(
             dependencies: [],
             path: "Sources/CLua",
             cSettings: [
+                .define("LUA_FLOORN2I"), // Lua 5.1 doesn't care about floats/ints
                 .define("LUA_USE_POSIX"),
                 .define("LUA_COMPAT_5_1"),
                 .define("LUA_USE_MACOSX", .when(platforms: [.macOS])),
